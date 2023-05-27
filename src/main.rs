@@ -3,7 +3,6 @@ mod to_monochrome_png;
 use bitstream::BitArray;
 
 fn main() {
-
     // A bunch of constants
     // L variables in UPC and EAN
     let l_digits = [
@@ -22,24 +21,28 @@ fn main() {
         0b1110010, 0b1100110, 0b1101100, 0b1000010, 0b1011100, 0b1001110, 0b1010000, 0b1000100,
         0b1001000, 0b1110100,
     ];
+    const BARCODE_HEIGHT: u32 = 78;
+    let barcode_width: u32 = 113;
 
-    let mut bit_array = BitArray::new(113);
+    let mut bit_array = BitArray::new(barcode_width as usize);
 
     bit_array.seek(8);
     bit_array.add_bits(0b0101, 4);
 
-    for _ in 0..6 {
-        bit_array.add_bits(l_digits[0], 7);
+    for i in 1..=6 {
+        bit_array.add_bits(l_digits[i % 10], 7);
     }
 
     bit_array.add_bits(0b01010, 5);
 
-    for _ in 0..6 {
-        bit_array.add_bits(r_digits[0], 7);
+    for i in 7..=12 {
+        bit_array.add_bits(r_digits[i % 10], 7);
     }
 
     bit_array.add_bits(0b1010, 4);
     bit_array.seek(8);
 
     let byte_array = bit_array.get_bytes();
+
+    to_monochrome_png::write_png(123456789012, BARCODE_HEIGHT, barcode_width, byte_array);
 }
