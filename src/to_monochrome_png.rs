@@ -35,44 +35,13 @@ pub fn write_png(original_num: u64, height: u32, width: u32, byte_array: &[u8]) 
     ]);
     write_chunk(&mut file, b"IHDR", &IHDR_data);
 
-    // hasher = Hasher::new();
-    // file.write_all(&(13u32.to_be_bytes()))
-    //     .expect("Could not write to file");
-    // write_with_crc(b"IHDR", &mut hasher, &mut file);
-    // write_with_crc(&(width.to_be_bytes()), &mut hasher, &mut file);
-    // write_with_crc(&(height.to_be_bytes()), &mut hasher, &mut file);
-    // write_with_crc(
-    //     &[
-    //         1, // Bit depth
-    //         3, // Color type (indexed)
-    //         0, // Compression method
-    //         0, // Filter method
-    //         0, // Interlace method = "no"
-    //     ],
-    //     &mut hasher,
-    //     &mut file,
-    // );
-
-    // let ihdr_crc:[u8; 4] = hasher.finalize().to_be_bytes();
-    // file.write_all(&ihdr_crc).expect("Could not write to file");
-
-    // Don't worry about PLTE because we are using grayscale
-    // // PLTE
-    // hasher = Hasher::new();
-    // file.write_all(&(6u32.to_be_bytes()))
-    //     .expect("Could not write to file");
-    // write_with_crc(b"PLTE", &mut hasher, &mut file);
-    // write_with_crc(&[0xffu8; 3], &mut hasher, &mut file); // Color 0 is white (0xffffff)
-    // write_with_crc(&[0u8; 3], &mut hasher, &mut file); // Color 1 is white (0x000000)
-    // let plte_crc:[u8; 4] = hasher.finalize().to_be_bytes();
-
-    // // pHYs - Physical pixel dimensions
-    // const PIXELS_PER_UNIT: [u8; 4] = 3000u32.to_be_bytes();
-    // let mut pHYs_data: Vec<u8> = Vec::with_capacity(9);
-    // pHYs_data.extend_from_slice(&PIXELS_PER_UNIT); // X axis
-    // pHYs_data.extend_from_slice(&PIXELS_PER_UNIT); // Y axis
-    // pHYs_data.push(1u8);
-    // write_chunk(&mut file, b"pHYs", &pHYs_data);
+    // pHYs - Physical pixel dimensions
+    const PIXELS_PER_UNIT: [u8; 4] = 3000u32.to_be_bytes();
+    let mut pHYs_data: Vec<u8> = Vec::with_capacity(9);
+    pHYs_data.extend_from_slice(&PIXELS_PER_UNIT); // X axis
+    pHYs_data.extend_from_slice(&PIXELS_PER_UNIT); // Y axis
+    pHYs_data.push(1u8);
+    write_chunk(&mut file, b"pHYs", &pHYs_data);
 
     // IDAT - Image data
     // First, expand the byte array to the required height

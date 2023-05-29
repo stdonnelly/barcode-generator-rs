@@ -39,9 +39,9 @@ impl BitArray {
         self.cursor += length;
     }
 
-    pub fn seek(&mut self, n: usize) {
-        self.cursor += n;
-    }
+    // pub fn seek(&mut self, n: usize) {
+    //     self.cursor += n;
+    // }
 
     pub fn get_bytes(&self) -> &Vec<u8> {
         &self.byte_array
@@ -60,7 +60,7 @@ fn print_bits(my_bits: &[u8]) -> String {
     for &my_byte in my_bits {
         let mut bitmask: u8 = 0b10000000;
         while bitmask > 0 {
-            out_string.push(if (bitmask & my_byte) == 0u8 {
+            out_string.push(if (bitmask & my_byte) != 0u8 {
                 '\u{2588}'
             } else {
                 ' '
