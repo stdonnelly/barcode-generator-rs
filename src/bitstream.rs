@@ -48,7 +48,7 @@ impl BitArray {
     }
 }
 
-impl fmt::Display for BitArray {
+impl fmt::Debug for BitArray {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", print_bits(&self.byte_array))
     }

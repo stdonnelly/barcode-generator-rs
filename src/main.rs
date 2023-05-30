@@ -50,30 +50,17 @@ fn main() {
 
     let byte_array = bit_array.get_bytes();
 
-    to_monochrome_png::write_png(123456789012, BARCODE_HEIGHT, barcode_width, byte_array);
+    to_monochrome_png::write_png(&[1,2,3,4,5,6,7,8,9,0,1,3], BARCODE_HEIGHT, barcode_width, byte_array);
 }
 
-fn ints_from_str(in_str: &str, len: usize) -> (u64, Vec<u8>) {
-    // For now, just panic if the input is not a number
-    let as_int: u64 = in_str.parse().unwrap();
-    let mut as_int_mut = as_int;
-    let mut num_list: Vec<u8> = Vec::with_capacity(len);
-
-    // Initialize the size of the vector
-    // This is fine because we will be writing immediately
-    unsafe {
-        num_list.set_len(len);
-    }
-
-    // We have to iterate in reverse order
-    for num in num_list.iter_mut().rev() {
-        let next_num = (as_int_mut % 10) as u8;
-        as_int_mut /= 10;
-
-        *num = next_num;
-    }
-
-    (as_int, num_list)
+fn ints_from_str(in_str: &str) -> Vec<u8> {
+    in_str.chars().filter_map(|x| {
+        if let Some(digit) = x.to_digit(10) {
+            Some(digit as u8)
+        } else {
+            None
+        }
+    }).collect()
 }
 
 enum DigitType {

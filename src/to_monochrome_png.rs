@@ -2,18 +2,26 @@
 
 use crc32fast as crc;
 use miniz_oxide::deflate::compress_to_vec_zlib;
-use std::fs::File;
+use std::fs::{File, create_dir_all};
 use std::io::prelude::Write;
 use std::path::Path;
 
-pub fn write_png(original_num: u64, height: u32, width: u32, byte_array: &[u8]) {
+pub fn write_png(original_num: &[u8], height: u32, width: u32, byte_array: &[u8]) {
     // Don't know if these are UPC or most barcodes
     const PNG_MAGIC_NUMBER: [u8; 8] = [0x89u8, b'P', b'N', b'G', 0x0du8, 0x0au8, 0x1au8, 0x0au8];
 
-    let filename = format!("{:012}.png", original_num);
+    let filename_str: String = original_num
+        .into_iter()
+        .map(|x| char::from_digit(*x as u32, 10).expect("Array of numbers is not made of digits"))
+        .collect();
+    let filename = format!("out/{}.png", filename_str);
 
     let path = Path::new(&filename);
 
+    if let Some(dir) = path.parent() {
+        create_dir_all(dir).expect("Could not create directory");
+    }
+    
     let mut file = File::create(path).expect("Could not open file.");
 
     // Headers:
@@ -31,7 +39,7 @@ pub fn write_png(original_num: u64, height: u32, width: u32, byte_array: &[u8]) 
         0, // Color type: Grayscale (Was using 3 with a monochrome palette before, this might mean I need to flip every bit)
         0, // Compression method 0 (only accepted value)
         0, // Filter method 0 (only accepted value)
-        0  // Interlace method: "no interlace"
+        0, // Interlace method: "no interlace"
     ]);
     write_chunk(&mut file, b"IHDR", &IHDR_data);
 
@@ -58,7 +66,6 @@ pub fn write_png(original_num: u64, height: u32, width: u32, byte_array: &[u8]) 
 
     // IEND - Image trailer - always empty
     write_chunk(&mut file, b"IEND", &[]);
-
 }
 
 fn write_chunk(file: &mut File, name: &[u8], data: &[u8]) {
@@ -69,6 +76,6 @@ fn write_chunk(file: &mut File, name: &[u8], data: &[u8]) {
 
     file.write_all(data).expect("Could not write to file");
 
-    let crc_bytes:[u8; 4] = crc::hash([name, data].concat().as_slice()).to_be_bytes();
+    let crc_bytes: [u8; 4] = crc::hash([name, data].concat().as_slice()).to_be_bytes();
     file.write_all(&crc_bytes).expect("Could not write to file");
 }
