@@ -1,6 +1,7 @@
 mod bitstream;
 mod to_monochrome_png;
 use bitstream::BitArray;
+use std::io::{stdin, stdout, Write};
 
 fn main() {
     const ARR_LEN: usize = 10;
@@ -33,16 +34,26 @@ fn main() {
     bit_array.add_bits(0b1111_1111, 8);
     bit_array.add_bits(0b1010, 4);
 
-    // TODO: Fill with user-defined info
+    // Fill with user-defined info
+    let mut buf: String = String::new();
+    print!("Enter the barcode number: ");
+    stdout().flush().expect("Error while writing to console");
+    stdin().read_line(&mut buf).expect("Error reading user input");
 
-    for i in 1..=6 {
-        bit_array.add_bits(l_digits[i % 10], 7);
+    let original_num = ints_from_str(&buf);
+
+    if original_num.len() < 12 {
+        panic!("Not enough digits");
+    }
+
+    for digit in &original_num[0..6] {
+        bit_array.add_bits(l_digits[(digit % 10) as usize], 7);
     }
 
     bit_array.add_bits(0b10101, 5);
 
-    for i in 7..=12 {
-        bit_array.add_bits(r_digits[i % 10], 7);
+    for digit in &original_num[6..12] {
+        bit_array.add_bits(r_digits[(digit % 10) as usize], 7);
     }
 
     bit_array.add_bits(0b0101, 4);
@@ -50,7 +61,7 @@ fn main() {
 
     let byte_array = bit_array.get_bytes();
 
-    to_monochrome_png::write_png(&[1,2,3,4,5,6,7,8,9,0,1,3], BARCODE_HEIGHT, barcode_width, byte_array);
+    to_monochrome_png::write_png(&original_num, BARCODE_HEIGHT, barcode_width, byte_array);
 }
 
 fn ints_from_str(in_str: &str) -> Vec<u8> {
@@ -63,7 +74,7 @@ fn ints_from_str(in_str: &str) -> Vec<u8> {
     }).collect()
 }
 
-enum DigitType {
-    L,
-    G,
-}
+// enum DigitType {
+//     L,
+//     G,
+// }
