@@ -1,8 +1,7 @@
 use crate::to_monochrome_png;
 use crate::bitstream::BitArray;
-use std::io::{stdin, stdout, Write};
 
-pub(crate) fn main() {
+pub(crate) fn main(barcode_string: &str) {
     const ARR_LEN: usize = 10;
 
     // L variables in UPC and EAN
@@ -33,13 +32,7 @@ pub(crate) fn main() {
     bit_array.add_bits(0b1111_1111, 8);
     bit_array.add_bits(0b1010, 4);
 
-    // Fill with user-defined info
-    let mut buf: String = String::new();
-    print!("Enter the barcode number: ");
-    stdout().flush().expect("Error while writing to console");
-    stdin().read_line(&mut buf).expect("Error reading user input");
-
-    let original_num = ints_from_str(&buf);
+    let original_num = ints_from_str(barcode_string);
 
     if original_num.len() < 12 {
         panic!("Not enough digits");
